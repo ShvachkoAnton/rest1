@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from rest_framework import generics
 class Postserializer(serializers.HyperlinkedModelSerializer):
     author=serializers.ReadOnlyField(source='author.username')
-    highlight=serializers.HyperlinkedIdentityField(view_name='snippet-highlight', format='html')
+    highlight=serializers.HyperlinkedIdentityField(view_name='post-highlight', format='html')
     class Meta:
         model=Post
         fields=['url', 'id','highlight', 'text','author','pub_date',]

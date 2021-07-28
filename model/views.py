@@ -11,8 +11,9 @@ from rest_framework.views import APIView
 from .serializers import Postserializer,Userserializer
 from django.http import JsonResponse, request, Http404
 from .models import Post
+from rest_framework import viewsets
 from .permissions import IsAuthorOrReadOnly
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,action
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework.reverse import reverse
@@ -54,7 +55,7 @@ def post_detail(request,pk):
 
 
 
-class List(APIView):
+"""class List(APIView):
     def get(self,request, format=None):
         serializer_context = {
             'request': request,
@@ -129,3 +130,19 @@ class PostHighlight(generics.GenericAPIView):
     def get(self,request,*args,**kwargs):
         post=self.get_object()
         return Response(post.highlight)
+"""
+class UserViewSet(viewsets.ReadOnlyModelViewSet): 
+    queryset=User.objects.all()
+    serializer_class=Userserializer
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset=Post.objects.all()
+    serializer_class=Postserializer
+    permission_classes=[permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def highlight(self, request, *args, **kwargs):
+        snippet = self.get_object()
+        return Response(snippet.highlight)
+    def perform_create(self,serializer):
+        serializer.save(author=self.request.user)
